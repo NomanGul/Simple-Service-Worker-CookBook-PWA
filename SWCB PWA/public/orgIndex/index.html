@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<head lang="en-US">
+  <title>Service Worker CookBook</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="/src/css/materialize.min.css" media="all"/>
+  <!-- <link type="text/css" rel="stylesheet" href="/src/css/app.css"/> -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Service Worker CookBook">
+  <link rel="apple-touch-icon" href="/images/icons/icon-72x72.png" sizes="72x72">
+  <link rel="apple-touch-icon" href="/images/icons/icon-96x96.png" sizes="96x96">
+  <link rel="apple-touch-icon" href="/images/icons/icon-128x128.png" sizes="128x128">
+  <link rel="apple-touch-icon" href="/images/icons/icon-144x144.png" sizes="144x144">
+  <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" sizes="152x152">
+  <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/images/icons/icon-384x384.png" sizes="384x384">
+  <link rel="apple-touch-icon" href="/images/icons/icon-512x512.png" sizes="512x512">
+  <meta name="msapplication-TileImage" content="/images/icons/icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#00f">
+  <meta name="theme-color" content="#1e88e5">
+  <style>
+    nav .nav-wrapper{position:relative;height:100%}
+    .navbar-fixed{position:relative;height:56px;z-index:997}.navbar-fixed nav{position:fixed}@media only screen and (min-width: 601px){nav.nav-extended .nav-wrapper{min-height:64px}nav,nav .nav-wrapper i,nav a.button-collapse,nav a.button-collapse i{height:64px;line-height:64px}.navbar-fixed{height:64px}}
+  #sidenav-overlay {
+    z-index: 0;
+  }
+  @media only screen and (min-width: 993px) {
+    nav a.button-collapse {
+      display: inline;
+    }
+  }
+  body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  main {
+    flex: 1 0 auto;
+  }
+  .RED{
+    color:#d0021b;
+  }
+  .REDbtn{
+    background-color:#d0021b;
+  }
+  .likeQuote {
+    margin: 20px 0;
+  padding-left: 1.5rem;
+  border-left: 5px solid #ee6e73;
+  }
+  </style>
+</head>
+<body>
+  <!--NAVBAR-->
+  <div class="navbar-fixed">  
+    <nav>
+      <div class="nav-wrapper blue darken-1">
+        <a href="#!" class="brand-logo hide-on-med-and-up" style="font-size: 4vmin">Service Worker CookBook</a>
+        <a href="#!" class="brand-logo hide-on-small-only center" style="font-size: 4vmin">Service Worker CookBook</a>
+        <a href="#" data-activates="mobile-demo" class="button-collapse">
+          <i class="material-icons">menu</i>
+        </a>
+        <ul class="side-nav" id="mobile-demo">
+          <li>
+            <a href="#introduction">Introduction to Service Worker</a>
+          </li>
+          <li>
+            <a href="#whatIsSW">What is a Service Worker?</a>
+          </li>
+          <li>
+            <a href="#SWLifeCycle">The Service Worker LifeCycle</a>
+          </li>
+          <li>
+            <a href="#RegisterASW">Register a Service Worker</a>
+          </li>
+          <li>
+            <a href="#InstallASW">Install a Service Worker</a>
+          </li>
+          <li>
+            <a href="#cacheAndReturnRequest">Cache & return requests</a>
+          </li>
+          <li>
+            <a href="#cachingFilesWithSW">Caching files with Service Worker</a>
+          </li>
+          <li>
+            <a href="#cachingOnUserInteraction">Caching Strategies</a>
+          </li>
+          <li>
+            <a href="#checkingForSupport">Cache API Properties & Methods</a>
+          </li>
+          <li>
+            <a href="#updateASW">Update a Service Worker</a>
+          </li>
+          <li>
+            <a href="#about">About</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <!--CONTAINER-->
+  <div class="container">
+      <div class="col s12 m8 offset-m2 l6 offset-l3">
+          <div class="card-panel blue darken-1 hoverable">
+            <div class="row valign-wrapper">
+              <div class="col s2">
+                <img src="/images/subHeaderPhoto.jpg" alt="Author Photo" class="circle responsive-img">
+              </div>
+              <div class="col s10">
+                <span class="white-text">
+                  This Progressive Web App is developed by Noman Gul, a student of the Saylani Mass Training. I hope you like this PWA So don't forget to give your feedback.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+    <!--SW intro-->
+    <div id="introduction" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">Introduction to Service Worker</p>
+      <p class="grey-text text-darken-4 flow-text"> Rich offline experiences,<span class="RED"> periodic background syncs, push notifications</span> functionality that would normally require a native application are coming to the <span class="RED">web.</span> Service workers provide the technical foundation that all these features rely on.</p>
+      <!-- <div class="video-container">
+        <iframe id="introVideo" width="412" height="232" src="https://www.youtube.com/embed/jVfXiv03y5c" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div><div class="center-align" style="margin: 2%;">
+      <button class="REDbtn btn waves-effect waves-light" id="introVideoBtn">Save for Offline</button></div> -->
+    </div>
+    <!--whats SW-->
+    <div id="whatIsSW" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">What is a Service Worker?</p>
+      <p class="grey-text text-darken-4 flow-text">A service worker is a script that your browser runs in the background separate from a web page, opening the door to features that don't need a web page or user interaction. Today, they already include features like <span class="RED">push notifications</span> and <span class="RED">background sync.</span> In the future, service workers might support other things like periodic sync or geofencing.The core feature discussed in this CookBook is the ability to intercept and handle network requests, including programmatically managing a cache of responses.</p>
+      <!-- <div class="video-container">
+        <iframe width="854" height="480" src="https://www.youtube.com/embed/A6MHtKkA0CA" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div> -->
+      <p class="grey-text text-darken-4 flow-text">The reason this is such an exciting <span class="RED">API</span> is that it allows you to support offline experiences, giving developers complete control over the experience.</p>
+      <p class="grey-text text-darken-4 flow-text">Before service worker, there was one other <span class="RED">API</span> that gave users an offline experience on the web called AppCache. There are a number of issues with the AppCache <span class="RED">API</span> that service workers were designed to avoid.</p>
+      <ul class="collapsible popout">
+        <li class="active">
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>Things to note about a service worker:</div>
+          <div class="collapsible-body">
+            <span>It's a JavaScript Worker, so it can't access the DOM directly. Instead, a service worker can communicate withthe pages it controls by responding to messages sent via the <span class="RED">postmessage</span> interface, and those pages can manipulate the DOM if needed.</span>
+          </div>
+          <div class="collapsible-body">
+            <span>Service worker is a programmable network proxy, allowing you to control how network requests from your page are handled.</span>
+          </div>
+          <div class="collapsible-body">
+            <span>It's terminated when not in use, and restarted when it's next needed, so you cannot rely on global state within a service worker's <span class="RED">onfetch</span> and <span class="RED">onmessage</span> handlers. If there is information that you need to persist and reuse across restarts, service workers do have access to the IndexedDB <span class="RED">API</span>.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <!--SW lifecycle-->
+    <div id="SWLifeCycle" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">The Service Worker Life Cycle</p>
+      <p class="grey-text text-darken-4 flow-text">A service worker has a lifecycle that is completely separate from your web page. A service worker goes through three steps in its lifecycle:</p>
+      <p class="grey-text text-darken-4 flow-text" style="font-weight: bolder">Registration >> Installation >> Activation</p>
+      <p class="grey-text text-darken-4 flow-text">To install a service worker for your site, you need to register it, which you do in your page's JavaScript. Registering a service worker will cause the browser to start the service worker install step in the background.</p>
+      <p class="grey-text text-darken-4 flow-text">Typically during the install step, you'll want to cache some static assets. If all the files are cached successfully, then the service worker becomes installed. If any of the files fail to download and cache, then the install step will fail and the service worker won't activate (i.e. won't be installed). If that happens, don't worry, it'll try again next time. But that means if it does install, you know you've got those static assets in the cache.</p>
+      <p class="grey-text text-darken-4 flow-text">When installed, the activation step will follow and this is a great opportunity for handling any management of old caches, which we'll cover during the service worker update section.</p>
+      <p class="grey-text text-darken-4 flow-text">After the activation step, the service worker will control all pages that fall under its scope, though the page that registered the service worker for the first time won't be controlled until it's loaded again. Once a service worker is in control, it will be in one of two states: either the service worker will be terminated to save memory, or it will handle <span class="RED">fetch</span> and <span class="RED">message</span> events that occur when a network request or <span class="RED">message</span> is made from your page.</p>
+      <!-- <div class="video-container">
+        <iframe width="854" height="480" src="https://www.youtube.com/embed/TF4AB75PyIc" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div> -->
+      <p class="grey-text text-darken-4 flow-text">Below is an overly simplified version of the service worker lifecycle on its first installation.</p>
+      <div>
+        <img class="responsive-img lazy" src="/images/LazyLoadImages.jpg" data-src="/images/sw-lifecycle.png" alt="Service Worker Lifecycle Image">
+      </div>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>Browser Support</div>
+          <div class="collapsible-body">
+            <span>Browser options are growing. Service workers are supported by Chrome, Firefox and Opera. Microsoft Edge is now showing public support. Even Safari has dropped hints of future development.</span>
+          </div>
+          <div class="collapsible-body">
+            <div>
+              <img class="responsive-img lazy" src="/images/LazyLoadImages.jpg" data-src="/images/sw-support2.png" alt="Service worker support">
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>You need HTTPS</div>
+          <div class="collapsible-body">
+            <span>Using service worker you can hijack connections, fabricate, and filter responses. Powerful stuff. While you would
+              use these powers for good, a man-in-the-middle might not. To avoid this, you can only register service workers
+              on pages served over HTTPS, so we know the service worker the browser receives hasn't been tampered with during
+              its journey through the network.</span>
+          </div>
+          <div class="collapsible-body">
+            <span>During development you'll be able to use service worker through localhost, but to deploy it on a site you'll
+              need to have HTTPS setup on your server.</span>
+          </div>
+          <div class="collapsible-body">
+            <span>Firebase are served over HTTPS, so they're a great place to host demos.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <!--Register a SW-->
+    <div id="RegisterASW" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">Register a Service Worker</p>
+      <p class="grey-text text-darken-4 flow-text">To install a service worker you need to kick start the process by registering it in your page. This tells the browser
+        where your service worker JavaScript file lives.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code><pre>if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker
+    .register('/sw.js')
+    .then(function(registration) {
+      console.log('ServiceWorker registered');
+    }, function(err) {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">This code checks to see if the service worker <span class="RED">API</span> is available, and if it is, the service worker at <span class="RED">/sw.js</span> is registered
+        once the page is loaded.</p>
+      <p class="grey-text text-darken-4 flow-text">You can call <span class="RED">register()</span> every time a page loads without concern; the browser will figure out if the service worker
+        is already registered or not and handle it accordingly.</p>
+      <p class="grey-text text-darken-4 flow-text">One subtlety with the <span class="RED">register()</span> method is the location of the service worker file. You'll notice in this case that
+        the service worker file is at the root of the domain. This means that the service worker's scope will be the entire
+        origin. In other words, this service worker will receive <span class="RED">fetch</span> events for everything on this domain. If we register
+        the service worker file at /example/sw.js, then the service worker would only see <span class="RED">fetch</span> events for pages whose URL
+        starts with /example/ (i.e. /example/page1/, /example/page2/).</p>
+      <p class="grey-text text-darken-4 flow-text">Now you can check that a service worker is enabled by going to <span class="RED">chrome://inspect/#service-workers</span> and looking for your
+        site.</p>
+      <div>
+        <img class="responsive-img lazy" src="/images/LazyLoadImages.jpg" data-src="/images/sw-chrome-inspect2.png" alt="Chrome inspect view">
+      </div>
+      <p class="grey-text text-darken-4 flow-text">When service worker was first being implemented, you could also view your service worker details through <span class="RED">chrome://serviceworker-internals</span>.
+        This may still be useful, if for nothing more than learning about the life cycle of service workers, but don't be
+        surprised if it gets replaced completely by <span class="RED">chrome://inspect/#service-workers</span> at a later date.</p>
+      <p class="grey-text text-darken-4 flow-text">You may find it useful to test your service worker in an Incognito window so that you can close and reopen knowing
+        that the previous service worker won't affect the new window. Any registrations and caches created from within an
+        Incognito window will be cleared out once that window is closed.</p>
+    </div>
+    <!--Install SW-->
+    <div id="InstallASW" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">Install a Service Worker</p>
+      <p class="grey-text text-darken-4 flow-text">After a controlled page kicks off the registration process, let's shift to the point of view of the service worker
+        script, which handles the install event.</p>
+      <p class="grey-text text-darken-4 flow-text">For the most basic example, you need to define a callback for the install event and decide which files you want to
+        cache.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code>
+                        <pre>self.addEventListener('install', function(event) {
+  // Perform install steps
+});</pre>
+                      </code>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">Inside of our install callback, we need to take the following steps:
+      </p>
+      <p class="grey-text text-darken-4 flow-text" style="font-weight: bolder">Open a Cache >> Cache our files >> Confirm whether all the required assets are cached or not.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code><pre>var CACHE_NAME = 'my-site-cache-v1';
+var urlsToCache = [
+  '/',
+  '/styles/main.css',
+  '/script/main.js'
+];
+
+self.addEventListener('install', function(event) {
+  // Perform install steps
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">Here you can see we call <span class="RED">caches.open()</span> with our desired cache name, after which we call <span class="RED">cache.addAll()</span> and pass in our array of files. This is a chain of <span class="RED"><span class="RED">Promises</span></span> (<span class="RED">caches.open()</span> and <span class="RED">cache.addAll()</span>). The <span class="RED">event.waitUntil()</span> method takes a <span class="RED">Promise</span> and uses it to know how long installation takes, and whether it succeeded or not.</p>
+      <p class="grey-text text-darken-4 flow-text">If all the files are successfully cached, then the service worker will be installed. If any of the files fail to download, then the install step will fail. This allows you to rely on having all the assets that you defined, but does mean you need to be careful with the list of files you decide to cache in the install step. Defining a long list of files will increase the chance that one file may fail to cache, leading to your service worker not getting installed.</p>
+      <p class="grey-text text-darken-4 flow-text">This is just one example, you can perform other tasks in the install event or avoid setting an install event listener altogether.</p>
+    </div>
+    <!--Cache and return request-->
+    <div id="cacheAndReturnRequest" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">Cache and return requests</p>
+      <p class="grey-text text-darken-4 flow-text">Now that you've installed a service worker, you probably want to return one of your cached responses, right?</p>
+      <p class="grey-text text-darken-4 flow-text">After a service worker is installed and the user navigates to a different page or refreshes, the service worker will
+        begin to receive <span class="RED">fetch</span> events, an example of which is below.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code><pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(response) {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
+  );
+});</pre></code>
+            </span>
+          </div>
+          </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">Here we've defined our <span class="RED">fetch</span> event and within <span class="RED">event.respondWith()</span>, we pass in a <span class="RED">Promise</span> from <span class="RED">caches.match()</span>. This method looks at the request and finds any cached results from any of the caches your service worker created.</p>
+      <p class="grey-text text-darken-4 flow-text">If we have a matching response, we return the cached value, otherwise we return the result of a call to <span class="RED">fetch</span>, which
+        will make a network request and return the data if anything can be retrieved from the network. This is a simple example
+        and uses any cached assets we cached during the install step.</p>
+    </div>
+    <!--caching files with SW-->
+    <div id="cachingFilesWithSW" class="section scrollspy">
+      <h5>
+      Caching Files with Service Worker
+      </h5>
+      <p class="flow-text likeQuote" style="font-weight: 450">Using the Cache API in the service worker</p>
+      <p class="grey-text text-darken-4 flow-text">The Service Worker <span class="RED">API</span> comes with a Cache interface, that lets you create stores of responses keyed by request. While
+        this interface was intended for service workers it is actually exposed on the window, and can be accessed from anywhere
+        in your scripts. The entry point is caches.</p>
+      <p class="grey-text text-darken-4 flow-text">You are responsible for implementing how your script (service worker) handles updates to the cache. All updates to
+        items in the cache must be explicitly requested; items will not expire and must be deleted. However, if the amount
+        of cached data exceeds the browser's storage limit, the browser will begin evicting all data associated with an origin,
+        one origin at a time, until the storage amount goes under the limit again. See Browser storage limits and eviction
+        criteria for more information.</p>
+    </div>
+    <!-- caching on user interaction -->
+    <div id="cachingOnUserInteraction" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 450">Caching On user interaction</p>
+      <p class="grey-text text-darken-4 flow-text">If the whole site can't be taken offline, you can let the user select the content they want available offline (for
+        example, a video, article, or photo gallery).</p>
+      <p class="grey-text text-darken-4 flow-text">One method is to give the user a "Read later" or "Save for offline" button. When it's clicked, <span class="RED">fetch</span> what you need from the network and put it in the cache:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code><pre>document.querySelector('.cache-article')
+.addEventListener('click', function(event) {
+  event.preventDefault();
+  var id = this.dataset.articleId;
+  caches.open('mysite-article-' + id)
+  .then(function(cache) {
+    fetch('/get-article-urls?id=' + id)
+    .then(function(response) {
+      // /get-article-urls returns a JSON-encoded array of
+      // resource URLs that a given article depends on
+      return response.json();
+    }).then(function(urls) {
+      cache.addAll(urls);
+    });
+  });
+});</pre></code>
+                </span>
+              </div>
+          </ul>
+          <p class="grey-text text-darken-4 flow-text">In the above example, when the user clicks an element with the cache-article class, we are getting the article ID, <span class="RED">fetching</span> the article with that ID, and adding the article to the cache.</p>
+          <ul class="collapsible popout">
+              <li>
+                <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                  <i class="material-icons">add_circle</i>NOTE:</div>
+                <div class="collapsible-body">
+                  <span>
+                      The Cache <span class="RED">API</span> is available on the window object, meaning you don't need to involve the service worker to add things to the cache.
+                  </span>
+                </div>
+            </ul>   
+    </div>
+    <!-- caching on net response -->
+    <div id="cachingOnNetworkResponse" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Caching On network response</p>
+        <p class="grey-text text-darken-4 flow-text">If a request doesn't match anything in the cache, get it from the network, send it to the page and add it to the cache at the same time.</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code><pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.open('mysite-dynamic')
+    .then(function(cache) {
+      return cache.match(event.request)
+      .then(function (response) {
+        return response || fetch(event.request)
+        .then(function(response) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      });
+    })
+  );
+});</pre></code>
+                </span>
+              </div>
+          </ul>
+          <p class="grey-text text-darken-4 flow-text">This approach works best for resources that frequently update, such as a user's inbox or article contents. This is also useful for non-essential content such as avatars, but care is needed. If you do this for a range of URLs, be careful not to bloat the storage of your origin — if the user needs to reclaim disk space you don't want to be the prime candidate. Make sure you get rid of items in the cache you don't need any more.</p>
+          <ul class="collapsible popout">
+              <li>
+                <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                  <i class="material-icons">add_circle</i>NOTE:</div>
+                <div class="collapsible-body">
+                  <span>
+                      To allow for efficient memory usage, you can only read a response/request's body once. In the code above, .clone() is used to create a copy of the response that can be read separately.
+                  </span>
+                </div>
+            </ul>
+    </div>
+    <!-- serving files from the cache -->
+    <div id="ServingFilesFromTheCache" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Serving files from the cache</p>
+        <p class="grey-text text-darken-4 flow-text">To serve content from the cache and make your app available offline you need to intercept network requests and respond with files stored in the cache. There are several approaches to this:</p>
+        <ul>
+          <li class="flow-text" style="list-style-type: disc">cache only</li>
+          <li class="flow-text" style="list-style-type: disc">network only</li>
+          <li class="flow-text" style="list-style-type: disc">cache falling back to network</li>
+          <li class="flow-text" style="list-style-type: disc">network falling back to cache</li>
+          <li class="flow-text" style="list-style-type: disc">cache then network</li>
+        </ul>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>NOTE:</div>
+              <div class="collapsible-body">
+                <span>
+                    There are a few approaches we don't cover here. See Jake Archibald's Offline Cookbook for a full list.
+                </span>
+              </div>
+          </ul>
+    </div>
+    <!--Cache Only-->
+    <div id="cacheOnly" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Cache only</p>
+        <p class="grey-text text-darken-4 flow-text">You don't often need to handle this case specifically. Cache falling back to network is more often the appropriate approach.</p>
+        <p class="grey-text text-darken-4 flow-text">This approach is good for any static assets that are part of your app's main code (part of that "version" of your app). You should have cached these in the install event, so you can depend on them being there.</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code><pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(caches.match(event.request));
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+          <p class="grey-text text-darken-4 flow-text">If a match isn't found in the cache, the response will look like a connection error.</p>
+    </div>
+    <!--Network only-->
+    <div id="networkOnly" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 450">Network only</p>
+      <p class="grey-text text-darken-4 flow-text">This is the correct approach for things that can't be performed offline, such as analytics pings and non-GET requests. Again, you don't often need to handle this case specifically and the cache falling back to network approach will often be more appropriate.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code><pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(fetch(event.request));
+});</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">Alternatively, simply don't call <span class="RED">event.respondWith</span>, which will result in default browser behaviour.</p>
+    </div>
+    <!--Cache falling back to net-->
+    <div id="cacheFallingBackToNetwork" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 450">Cache falling back to network</p>
+      <p class="grey-text text-darken-4 flow-text">If you're making your app offline-first, this is how you'll handle the majority of requests. Other patterns will be exceptions based on the incoming request.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code>
+<pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+    .then(function(response) {
+      return response || fetch(event.request);
+    })
+  );
+});</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">This gives you the "Cache only" behavior for things in the cache and the "Network only" behaviour for anything not cached (which includes all non-GET requests, as they cannot be cached).</p>
+    </div>
+    <!--Network falling back to cache-->
+    <div id="networkFallingBackToCache" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Network falling back to the cache</p>
+        <p class="grey-text text-darken-4 flow-text">This is a good approach for resources that update frequently, and are not part of the "version" of the site (for example, articles, avatars, social media timelines, game leader boards). Handling network requests this way means the online users get the most up-to-date content, and offline users get an older cached version.</p>
+        <p class="grey-text text-darken-4 flow-text">However, this method has flaws. If the user has an intermittent or slow connection they'll have to wait for the network to fail before they get content from the cache. This can take an extremely long time and is a frustrating user experience. See the next approach, Cache then network, for a better solution.</p>
+        <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code>
+<pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    fetch(event.request)
+    .catch(function() {
+      return caches.match(event.request);
+    })
+  );
+});</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+        <p class="grey-text text-darken-4 flow-text">Here we first send the request to the network using <span class="RED">fetch()</span>, and only if it fails do we look for a response in the cache.</p>
+    </div>
+    <!--Cache then network-->
+    <div id="cacheThenNetwork" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Cache then network</p>
+        <p class="grey-text text-darken-4 flow-text">This is also a good approach for resources that update frequently. This approach will get content on screen as fast as possible, but still display up-to-date content once it arrives.</p>
+        <p class="grey-text text-darken-4 flow-text">This requires the page to make two requests: one to the cache, and one to the network. The idea is to show the cached data first, then update the page when/if the network data arrives.</p>
+        <p class="grey-text text-darken-4 flow-text">Here is the code in the page:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>var networkDataReceived = false;
+
+startSpinner();
+
+// fetch fresh data
+var networkUpdate = fetch('/data.json')
+.then(function(response) {
+  return response.json();
+}).then(function(data) {
+  networkDataReceived = true;
+  updatePage(data);
+});
+
+// fetch cached data
+caches.match('/data.json')
+.then(function(response) {
+  if (!response) throw Error("No data");
+  return response.json();
+}).then(function(data) {
+  // don't overwrite newer network data
+  if (!networkDataReceived) {
+    updatePage(data);
+  }
+}).catch(function() {
+  // we didn't get cached data, the network is our last hope:
+  return networkUpdate;
+}).catch(showErrormessage)
+.then(stopSpinner());</pre></code>
+        </span>
+              </div>
+            </li>
+          </ul>        
+        <p class="grey-text text-darken-4 flow-text">We are sending a request to the network and the cache. The cache will most likely respond first and, if the network data has not already been received, we update the page with the data in the response. When the network responds we update the page again with the latest information.</p>
+        <p class="grey-text text-darken-4 flow-text">Here is the code in the service worker:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.open('mysite-dynamic')
+    .then(function(cache) {
+      return fetch(event.request)
+      .then(function(response) {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    })
+  );
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text">This caches the network responses as they are <span class="RED">fetched</span>.</p>
+        <p class="grey-text text-darken-4 flow-text">Sometimes you can replace the current data when new data arrives (for example, game leaderboard), but be careful not to hide or replace something the user may be interacting with. For example, if you load a page of blog posts from the cache and then add new posts to the top of the page as they are <span class="RED">fetched</span> from the network, you might consider adjusting the scroll position so the user is uninterrupted. This can be a good solution if your app layout is fairly linear.</p>
+    </div>
+    <!--Generic Fallback-->
+    <div id="genericFallback" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Generic fallback</p>
+        <p class="grey-text text-darken-4 flow-text">If you fail to serve something from the cache and/or network you may want to provide a generic fallback. This technique is ideal for secondary imagery such as avatars, failed POST requests, "Unavailable while offline" page.</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    // Try the cache
+    caches.match(event.request)
+    .then(function(response) {
+      // Fall back to network
+      return response || fetch(event.request);
+    }).catch(function() {
+      // If both fail, show a generic fallback:
+      return caches.match('/offline.html');
+      // However, in reality you'd have many different
+      // fallbacks, depending on URL & headers.
+      // Eg, a fallback silhouette image for avatars.
+    })
+  );
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text">The item you fallback to is likely to be an install dependency.</p>
+        <p class="grey-text text-darken-4 flow-text">You can also provide different fallbacks based on the network error:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    // Try the cache
+    caches.match(event.request
+    ).then(function(response) {
+      if (response) {
+        return response;
+      }
+      return fetch(event.request)
+      .then(function(response) {
+        if (response.status === 404) {
+          return caches.match('pages/404.html');
+        }
+        return response
+      });
+    }).catch(function() {
+      // If both fail, show a generic fallback:
+      return caches.match('/offline.html');
+    })
+  );
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text">Network response errors do not throw an error in the <span class="RED">fetch</span> <span class="RED">Promise</span>. Instead, <span class="RED">fetch</span> returns the response object containing the error code of the network error. This means we handle network errors in a <span class="RED">.then</span> instead of a <span class="RED">.catch</span>.</p>
+    </div>
+    <!--Removing outddated caches-->
+    <div id="removingOutdatedCaches" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Removing outdated caches</p>
+        <p class="grey-text text-darken-4 flow-text">Once a new service worker has installed and a previous version isn't being used, the new one activates, and you get an activate event. Because the old version is out of the way, it's a good time to delete unused caches.</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys()
+    .then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(function(cacheName) {
+          // Return true if you want to remove this cache,
+          // but remember that caches are shared across
+          // the whole origin
+        }).map(function(cacheName) {
+          return caches.delete(cacheName);
+        })
+      );
+    })
+  );
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text">During activation, other events such as <span class="RED">fetch</span> are put into a queue, so a long activation could potentially block page loads. Keep your activation as lean as possible, only using it for things you couldn't do while the old version was active.</p>
+    </div>
+    <p class="grey-text text-darken-4 flow-text likeQuote" id="cacheAPIProperties&Methods">Here we cover the Cache API properties and methods.</p>
+    <!--checking for support-->
+    <div id="checkingForSupport" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Checking for support</p>
+        <p class="grey-text text-darken-4 flow-text">We can check if the browser supports the Cache <span class="RED">API</span> like this:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>if ('caches' in window) {
+  // has support
+}</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+    </div>
+    <!--creating the cache-->
+    <div id="cretingTheCache" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 500">Creating the cache</p>
+        <p class="grey-text text-darken-4 flow-text">An origin can have multiple named Cache objects. To create a cache or open a connection to an existing cache we use the <span class="RED">caches.open</span> method.</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>caches.open(cacheName)</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text">This returns a <span class="RED">Promise</span> that resolves to the cache object. <span class="RED">caches.open</span> accepts a string that will be the name of the cache.</p>
+    </div>
+    <!--Working with data-->
+    <div id="workingWithData" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 500">Working with data</p>
+        <p class="grey-text text-darken-4 flow-text">The Cache <span class="RED">API</span> comes with several methods that let us create and manipulate data in the cache. These can be grouped into methods that either create, match, or delete data.</p>
+    </div>
+    <!--Create data-->
+    <div id="createData" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Create data</p>
+        <p class="grey-text text-darken-4 flow-text">There are three methods we can use to add data to the cache. These are add, addAll, and put. In practice, we will call these methods on the cache object returned from <span class="RED">caches.open()</span>. For example:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>caches.open('example-cache')
+  .then(function(cache) {
+  cache.add('/example-file.html');
+});</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">caches.open</span> returns the example-cache Cache object, which is passed to the callback in <span class="RED">.then</span>. We call the add method on this object to add the file to that cache.</p>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">cache.add</span>(request) - The add method takes a URL, retrieves it, and adds the resulting response object to the given cache. The key for that object will be the request, so we can retrieve this response object again later by this request.</p>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">cache.addAll</span>(requests) - This method is the same as add except it takes an array of URLs and adds them to the cache. If any of the files fail to be added to the cache, the whole operation will fail and none of the files will be added.</p>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">cache.put</span>(request, response) - This method takes both the request and response object and adds them to the cache. This lets you manually insert the response object. Often, you will just want to <span class="RED">fetch()</span> one or more requests and then add the result straight to your cache. In such cases you are better off just using <span class="RED">cache.add</span> or <span class="RED">cache.addAll</span>, as they are shorthand functions for one or more of these operations:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>fetch(url)
+  .then(function (response) {
+  return cache.put(url, response);
+})</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+    </div>
+    <!--match data-->
+    <div id="matchData" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Match data</p>
+        <p class="grey-text text-darken-4 flow-text">There are a couple of methods to search for specific content in the cache: match and matchAll. These can be called on the caches object to search through all of the existing caches, or on a specific cache returned from <span class="RED">caches.open()</span>.</p>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">caches.match</span>(request, options) - This method returns a <span class="RED">Promise</span> that resolves to the response object associated with the first matching request in the cache or caches. It returns undefined if no match is found. The first parameter is the request, and the second is an optional list of options to refine the search. Here are the options as defined by MDN:</p>
+        <ul class="collection">
+          <li class="collection-item"><b>ignoreSearch:</b> A Boolean that specifies whether to ignore the query string in the URL. For example, if set to true the ?value=bar part of http://foo.com/?value=bar would be ignored when performing a match. It defaults to false.</li>
+          <li class="collection-item"><b>ignoreMethod:</b> A Boolean that, when set to true, prevents matching operations from validating the Request HTTP method (normally only GET and HEAD are allowed.) It defaults to false.</li>
+          <li class="collection-item"><b>ignoreVary:</b> A Boolean that when set to true tells the matching operation not to perform VARY header matching — that is, if the URL matches you will get a match regardless of whether the Response object has a VARY header. It defaults to false.</li>
+          <li class="collection-item"><b>cacheName:</b> A DOMString that represents a specific cache to search within. Note that this option is ignored by Cache.match().</li>
+        </ul>
+        <p class="grey-text text-darken-4 flow-text"><span class="RED">caches.matchAll</span>(request, options) - This method is the same as .match except that it returns all of the matching responses from the cache instead of just the first. For example, if your app has cached some images contained in an image folder, we could return all images and perform some operation on them like this:</p>
+        <ul class="collapsible popout">
+            <li>
+              <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+                <i class="material-icons">add_circle</i>CODE:</div>
+              <div class="collapsible-body black white-text">
+                <span>
+                  <code>
+<pre>caches.open('example-cache')
+  .then(function(cache) {
+  cache.matchAll('/images/')
+  .then(function(response) {
+    response.forEach(function(element, index, array) {
+      cache.delete(element);
+    });
+  });
+})</pre></code>
+                </span>
+              </div>
+            </li>
+          </ul>
+    </div>
+    <!--delete data-->
+    <div id="deleteData" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Delete data</p>
+        <p class="grey-text text-darken-4 flow-text">We can delete items in the cache with <span class="RED">cache.delete</span>(request, options). This method finds the item in the cache matching the request, deletes it, and returns a <span class="RED">Promise</span> that resolves to true. If it doesn't find the item, it resolves to false. It also has the same optional options parameter available to it as the match method.</p>
+    </div>
+    <!--retrieve keys-->
+    <div id="retrieveKeys" class="section scrollspy">
+        <p class="flow-text likeQuote" style="font-weight: 450">Retrieve keys</p>
+        <p class="grey-text text-darken-4 flow-text">Finally, we can get a list of cache keys using <span class="RED">cache.keys</span>(request, options). This returns a <span class="RED">Promise</span> that resolves to an array of cache keys. These will be returned in the same order they were inserted into the cache. Both parameters are optional. If nothing is passed, <span class="RED">cache.keys</span> returns all of the requests in the cache. If a request is passed, it returns all of the matching requests from the cache. The options are the same as those in the previous methods.</p>
+        <p class="grey-text text-darken-4 flow-text">The keys method can also be called on the caches entry point to return the keys for the caches themselves. This lets you purge outdated caches in one go.</p>
+    </div>
+    <!--Update SW-->
+    <div id="updateASW" class="section scrollspy">
+      <p class="flow-text likeQuote" style="font-weight: 500">Update a Service Worker</p>
+      <p class="grey-text text-darken-4 flow-text">There will be a point in time where your service worker will need updating. When that time comes, you'll need to follow
+        these steps:</p>
+      <ul class="collection">
+        <li class="collection-item">1. Update your service worker JavaScript file. When the user navigates to your site, the browser tries to redownload the script file that defined the service worker in the background. If there is even a byte's difference in the service worker file compared to what it currently has, it considers it new.</li>
+        <li class="collection-item">2. Your new service worker will be started and the install event will be fired.</li>
+        <li class="collection-item">3. At this point the old service worker is still controlling the current pages so the new service worker will enter a waiting state.</li>
+        <li class="collection-item">4. When the currently open pages of your site are closed, the old service worker will be killed and the new service worker will take control.</li>
+        <li class="collection-item">5. Once your new service worker takes control, its activate event will be fired.</li>
+      </ul>
+      <p class="grey-text text-darken-4 flow-text">One common task that will occur in the activate callback is cache management. The reason you'll want to do this in the activate callback is because if you were to wipe out any old caches in the install step, any old service worker, which keeps control of all the current pages, will suddenly stop being able to serve files from that cache.</p>
+      <p class="grey-text text-darken-4 flow-text">Let's say we have one cache called 'my-site-cache-v1', and we find that we want to split this out into one cache for pages and one cache for blog posts. This means in the install step we'd create two caches, 'pages-cache-v1' and 'blog-posts-cache-v1' and in the activate step we'd want to delete our older 'my-site-cache-v1'.</p>
+      <p class="grey-text text-darken-4 flow-text">The following code would do this by looping through all of the caches in the service worker and deleting any caches that aren't defined in the cache whitelist.</p>
+      <ul class="collapsible popout">
+        <li>
+          <div class="collapsible-header light-blue lighten-5 light-blue-text text-darken-1 hoverable">
+            <i class="material-icons">add_circle</i>CODE:</div>
+          <div class="collapsible-body black white-text">
+            <span>
+              <code><pre>self.addEventListener('activate', function(event) {
+
+  var cacheWhitelist = ['pages-cache-v1', 'blog-posts-cache-v1'];
+
+  event.waitUntil(
+    caches.keys()
+    .then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});</pre></code>
+            </span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!--CONTAINER END-->
+  <!--FOOTER-->
+  <footer class="page-footer blue-grey darken-3"  id="about">
+    <div class="container">
+      <div class="col s12 m8 offset-m2 l6 offset-l3">
+        <div class="card-panel blue darken-1 hoverable">
+          <div class="row valign-wrapper">
+            <div class="col s2">
+              <img src="/images/subHeaderPhoto.jpg" alt="Author photo" class="circle responsive-img">
+            </div>
+            <div class="col s10">
+              <span class="white-text">
+                This Progressive Web App is developed by Noman Gul, a student of the Saylani Mass Training. I hope you like this PWA So don't forget to give your feedback.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+        Copyright © 2018 NG Inc. All rights reserved.
+      </div>
+    </div>
+  </footer>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script src="/src/js/app.js"></script>
+  <script>
+    $(".button-collapse").sideNav();
+    $(document).ready(function () {
+      $('.scrollspy').scrollSpy();
+    });
+  </script>
+</body>
+</html>
